@@ -54,11 +54,16 @@ class HoujinBangouScraper:
                 prefecture_select.select_by_visible_text(prefecture)
                 
                 # 市区町村の選択
-                time.sleep(0.3)
-                city_select = Select(self.driver.find_element(
-                    By.ID, 'addr_city'
-                ))
-                city_select.select_by_visible_text(city)
+                # 市区町村のドロップダウンが更新されるのを明示的に待機
+                city_select = self.wait.until(
+                    EC.presence_of_element_located((By.ID, 'addr_city'))
+                )
+                # さらにオプションが読み込まれるのを待機
+                self.wait.until(
+                    lambda driver: len(Select(city_select).options) > 1
+                )
+                # 市区町村を選択
+                Select(city_select).select_by_visible_text(city)
                 
                 # 詳細住所が指定されている場合
                 if details:
